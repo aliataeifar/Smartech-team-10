@@ -1,0 +1,69 @@
+import requests
+from bs4 import BeautifulSoup as bu
+from dash import dcc,dash
+import dash_bootstrap_components
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+from selenium.webdriver.common.keys import Keys
+
+
+path="chromedriver.exe"
+driver=webdriver.Chrome(executable_path=path)
+driver.get('https://www.digikala.com/search/category-mobile-phone/product-list/?brands%5B0%5D=18&has_selling_stock=1')
+#WebDriverWait(driver,30).until(EC.visibility_of_element_located((By.CSS_SELECTOR,'.ProductListPagesWrapper')))
+driver.execute_script('window.scrollTo(0,2000)')
+time.sleep(10)
+driver.execute_script('window.scrollTo(2000,4000)')
+time.sleep(10)
+driver.execute_script("window.scrollBy(4000,document.body.scrollHeight)")
+time.sleep(5)
+
+
+q=1
+list_name=[]
+list_price=[]
+list_link=[]
+alldiv=driver.find_elements(By.CSS_SELECTOR,".grow-1.d-flex.flex-column.ai-stretch.jc-start")
+
+
+images=driver.find_elements(By.TAG_NAME,"img")
+alla=driver.find_elements(By.CSS_SELECTOR,".d-block.pointer.pos-relative.bg-000.overflow-hidden.grow-1.py-3.px-4.px-2-lg.h-full-md.styles_VerticalProductCard--hover__ud7aD")
+for z in images:
+  if z.get_attribute("height")=="240":
+      src=z.get_attribute('src') 
+      image=requests.get(src).content
+      with open(f"images/{q}.jpg","wb") as wr:
+          wr.write(image)
+          q+=1
+  else:
+    continue 
+    
+for u in alla:
+  link=u.get_attribute("href")
+  list_link.append(link)
+with open("link.txt","w",encoding="utf-8") as wl:
+    for c in list_price:
+        wl.write(c+"\n")    
+
+   
+for i in alldiv:
+    name=i.find_elements(By.CSS_SELECTOR,'.ellipsis-2.text-body2-strong.color-700.styles_VerticalProductCard__productTitle__6zjjN')
+    price=i.find_elements(By.CSS_SELECTOR,'.d-flex.ai-center.jc-end.gap-1.color-700.color-400.text-h5.grow-1')
+    for x in name:
+      list_name.append(x.text)
+    for y in price:
+      list_price.append(y.text)
+with open("phone.txt","w",encoding="utf-8") as wph:
+        for a in list_name:
+          wph.write(a+"\n")
+with open("price.txt","w",encoding="utf-8") as wp:
+        for b in list_price:
+           wp.write(b+"\n")    
+
+
+   
+   
+
